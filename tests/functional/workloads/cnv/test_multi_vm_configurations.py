@@ -67,6 +67,7 @@ class TestCNVVM(E2ETest):
 
     @workloads
     @pytest.mark.polarion_id("OCS-6298")
+    @pytest.mark.pvc_delete_timeout(300)
     def test_cnv_vms(self, setup_cnv, setup):
         """
         Tests to verify configuration for non-GS like environment
