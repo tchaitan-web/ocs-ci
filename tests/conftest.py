@@ -11443,10 +11443,15 @@ def vm_clone_fixture(request):
                 else:
                     raise
 
-            pvc_obj = pvc.PVC(
-                name=cloned_vm.pvc_name,
-                namespace=cloned_vm.namespace,
-            )
+            data = {
+                "api_version": "v1",
+                "kind": "PersistentVolumeClaim",
+                "metadata": {
+                    "name": cloned_vm.pvc_name,
+                    "namespace": cloned_vm.namespace,
+                },
+            }
+            pvc_obj = pvc.PVC(**data)
             try:
                 pvc_obj.delete()
                 pvc_obj.ocp.wait_for_delete(
