@@ -11528,10 +11528,13 @@ def vm_snapshot_restore_fixture(request):
             snap.delete(wait=True)
 
             try:
+
+                time.sleep(10)
+
                 out = run_oc_command(
                     cmd=f"get volumesnapshot -n {snap.namespace} -o wide"
                 )
-                log.info(f"VolumeSnapshots:\n{out}")
+                log.info(f"VolumeSnapshots after 10 seconds:\n{out}")
 
                 out = run_oc_command(cmd="get volumesnapshotcontent -o wide")
                 log.info(f"VolumeSnapshotContents:\n{out}")
@@ -11541,6 +11544,7 @@ def vm_snapshot_restore_fixture(request):
 
                 out = run_oc_command(cmd=f"get pvc -n {snap.namespace} -o wide")
                 log.info(f"PVCs:\n{out}")
+
             except Exception as ex:
                 log.warning(f"Failed to collect snapshot debug information: {ex}")
 
