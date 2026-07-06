@@ -50,6 +50,7 @@ from ocs_ci.framework.pytest_customization.marks import (
 )
 from ocs_ci.helpers.odf_cli import ODFCliRunner
 
+from ocs_ci.helpers.performance_lib import run_oc_command
 from ocs_ci.helpers.proxy import update_container_with_proxy_env
 from ocs_ci.helpers.virtctl import get_virtctl_tool
 from ocs_ci.ocs import constants, defaults, fio_artefacts, node, ocp, platform_nodes
@@ -11524,6 +11525,23 @@ def vm_snapshot_restore_fixture(request):
         """
         for snap in snapshots:
             snap.delete(wait=True)
+
+            try:
+                out = run_oc_command(
+                    cmd=f"get volumesnapshot -n {snap.namespace} -o wide"
+                )
+                log.info(f"VolumeSnapshots:\n{out}")
+
+                out = run_oc_command(cmd="get volumesnapshotcontent -o wide")
+                log.info(f"VolumeSnapshotContents:\n{out}")
+
+                out = run_oc_command(cmd=f"get dv -n {snap.namespace} -o wide")
+                log.info(f"DataVolumes:\n{out}")
+
+                out = run_oc_command(cmd=f"get pvc -n {snap.namespace} -o wide")
+                log.info(f"PVCs:\n{out}")
+            except Exception as ex:
+                log.warning(f"Failed to collect snapshot debug information: {ex}")
 
     request.addfinalizer(teardown)
     return factory
