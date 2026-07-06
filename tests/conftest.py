@@ -11524,6 +11524,7 @@ def vm_snapshot_restore_fixture(request):
         Cleans up VM snapshots.
         """
         for snap in snapshots:
+            log.info(f"Deleting snapshot {snap.name} in namespace {snap.namespace}")
             snap.delete(wait=True)
 
             try:
