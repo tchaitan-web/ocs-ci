@@ -379,7 +379,7 @@ class TestVmSnapshotClone(E2ETest):
 
         """
 
-        MAX_WORKERS = 10
+        MAX_WORKERS = 1
         with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
             futures = {
                 executor.submit(
