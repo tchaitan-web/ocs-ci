@@ -255,7 +255,6 @@ from ocs_ci.helpers.cnv_helpers import (
     compute_vm_count_from_storage_capacity,
     calculate_vm_cnt_cpu_ram,
 )
-from ocs_ci.helpers.performance_lib import run_oc_command
 from ocs_ci.utility.utils import exec_cmd
 from ocs_ci.utility.iscsi_config import iscsi_teardown
 from ocs_ci.utility.iam_utils import (
@@ -11444,10 +11443,22 @@ def vm_clone_fixture(request):
                 else:
                     raise
 
-            run_oc_command(
-                cmd=f"delete pvc {cloned_vm.pvc_name}", namespace=cloned_vm.namespace
+            pvc_obj = pvc.PVC(
+                name=cloned_vm.pvc_name,
+                namespace=cloned_vm.namespace,
             )
-            log.info(f"Cloned VM PVC {cloned_vm.pvc_name} deleted")
+            try:
+                pvc_obj.delete()
+                pvc_obj.ocp.wait_for_delete(
+                    resource_name=pvc_obj.name,
+                    timeout=180,
+                )
+                log.info(f"Cloned VM PVC {pvc_obj.name} deleted")
+            except CommandFailed as e:
+                if "NotFound" in str(e):
+                    log.info(f"Cloned VM PVC {pvc_obj.name} was already deleted.")
+                else:
+                    raise
 
     request.addfinalizer(teardown)
     return factory
