@@ -420,6 +420,7 @@ def verify_hotplug(vm_obj, disks_before_hotplug):
     """
     try:
         disks_after_hotplug_raw = vm_obj.run_ssh_cmd("lsblk -o NAME,SIZE,MOUNTPOINT -P")
+        logger.info(f"Raw lsblk output:\n{disks_after_hotplug_raw}")
         disks_after_hotplug = set(
             re.findall(r'NAME="([^"]+)"', disks_after_hotplug_raw)
         )
@@ -439,10 +440,8 @@ def verify_hotplug(vm_obj, disks_before_hotplug):
             return True
         logger.info(f"No hotplug difference detected in VM {vm_obj.name}")
         return False
-    except Exception as error:
-        logger.error(
-            f"Error occurred while verifying hotplug in VM {vm_obj.name}: {str(error)}"
-        )
+    except Exception:
+        logger.exception(f"Error occurred while verifying hotplug in VM {vm_obj.name}")
         return False
 
 

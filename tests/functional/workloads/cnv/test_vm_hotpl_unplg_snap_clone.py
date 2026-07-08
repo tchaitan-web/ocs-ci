@@ -50,6 +50,15 @@ class TestVmHotPlugUnplugSnapClone(E2ETest):
         # Hotplug the PVC volume to the VM
         log.info(f"Hotplugging PVC {pvc.name} to VM {vm_obj.name}")
         vm_obj.addvolume(volume_name=pvc.name)
+        log.info(
+            f"VMI details after addvolume:\n"
+            f"{vm_obj.ocp.exec_oc_cmd(f'get vmi {vm_obj.name} -n {vm_obj.namespace} -o yaml')}"
+        )
+
+        log.info(
+            f"Current disks after addvolume:\n"
+            f"{vm_obj.run_ssh_cmd('lsblk -o NAME,SIZE,MOUNTPOINT -P')}"
+        )
         # Wait for the disk to be hotplugged successfully
         sample = TimeoutSampler(
             timeout=600,
