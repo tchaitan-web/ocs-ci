@@ -203,6 +203,21 @@ class TestVmHotPlugUnplugSnapClone(E2ETest):
                 f"{dvt_obj.name}:{clone_obj_dvt.name} created!"
             )
 
+            # Unplug the original hotplugged PVCs before cross-attaching clones.
+            # kubevirt/virt-launcher cannot reliably surface a second concurrent
+            # hotplugged block device inside the guest without freeing the slot first.
+            log.info(
+                f"Unplugging original PVC {pvc_obj.name} from VM {vm_obj_pvc.name} "
+                f"before attaching clone"
+            )
+            self.unplug_disks_and_verify(vm_obj_pvc, pvc_obj)
+
+            log.info(
+                f"Unplugging original PVC {dvt_obj.name} from VM {vm_obj_dvt.name} "
+                f"before attaching clone"
+            )
+            self.unplug_disks_and_verify(vm_obj_dvt, dvt_obj)
+
             # Attach clones to the opposite VMs
             log.info(f"Attaching clone of {dvt_obj.name} to VM {vm_obj_pvc.name}")
             before_disks_pvc = vm_obj_pvc.run_ssh_cmd(
@@ -239,10 +254,6 @@ class TestVmHotPlugUnplugSnapClone(E2ETest):
 
             log.info(f"Unplugging clone of {pvc_obj.name} from VM {vm_obj_dvt.name}")
             self.unplug_disks_and_verify(vm_obj_dvt, clone_obj_pvc)
-
-            # Unplug normal disks and verify detachment
-            for i, (vm_obj, pvc) in enumerate(vms_pvc):
-                self.unplug_disks_and_verify(vm_obj, pvc)
         except Exception as e:
             log.error(f"An error occurred during PVC Unplugging: {str(e)}")
             raise
